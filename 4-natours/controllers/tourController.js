@@ -4,6 +4,25 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 );
 
+//fourth param , the value of the parammeter
+exports.checkID = (req, res, next, val) => {
+  if (val > tours.length) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Invalid ID',
+    });
+  }
+  next();
+};
+exports.checkBody = (req, res, next) => {
+  if (!req.body.name || !req.body.price) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Missing name or price',
+    });
+  }
+  next();
+};
 exports.getAllTours = (req, res) => {
   console.log(req.requestTime);
   res.status(200).json({
@@ -17,15 +36,7 @@ exports.getAllTours = (req, res) => {
 exports.getTourById = (req, res) => {
   const id = req.params.id * 1; //multiply a string with a number, will convert that string to a number
   const tour = tours.find((el) => el.id === id); //find the data for the id we need
-  //if tour id we search is greater than the length
-  // if (id > tours.length) {
-  //if tour is undefined, if it is no tour
-  if (!tour) {
-    return res.status(404).json({
-      status: 'failed',
-      message: 'Invalid ID',
-    });
-  }
+
   res.status(200).json({
     status: 'success',
     data: { tour },
@@ -55,14 +66,6 @@ exports.createTour = (req, res) => {
 exports.updateTourById = (req, res) => {
   const id = req.params.id * 1;
   const tour = tours.find((tour) => tour.id === id);
-
-  if (!tour) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
-  }
-
   const updatedTour = { ...tour, ...req.body };
   const updatedTours = tours.map((tour) =>
     tour.id === updatedTour.id ? updatedTour : tour
